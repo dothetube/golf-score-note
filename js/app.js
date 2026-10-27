@@ -8,7 +8,7 @@ let editMe = false, netTab = "all", tieHigh = true;
 try { tieHigh = localStorage.getItem("golf-tie") !== "low"; } catch(e){}
 try { relMode = localStorage.getItem("golf-relmode") === "1"; } catch(e){}
 const relS = v => v > 0 ? "+"+v : String(v);
-let hcpDel = null, installEvt = null, impPending = null, impMsg = "", usageTxt = "", clearAsk = false;
+let hcpDel = null, installEvt = null, impPending = null, impMsg = "", usageTxt = "", clearAsk = false, packBusy = false, packMsg = "";
 let setup = null, confirmDel = false, dirty = false, saving = false, saveTimer = null, saveErr = "";
 const app = document.getElementById("app");
 
@@ -829,6 +829,9 @@ function renderSettings(){
       + '<div class="row-actions"><button class="btn primary" data-a="impmerge">합치기</button><button class="btn danger" data-a="impreplace">모두 바꾸기</button><button class="btn" data-a="impcancel">취소</button></div>'; }
   if (impMsg) h += '<p class="note" style="margin:8px 0 0">'+esc(impMsg)+'</p>';
   h += '</div>';
+  h += '<div class="card" style="margin-bottom:12px"><div style="font-weight:600;margin-bottom:6px">골프장 목록 불러오기</div><p class="note" style="margin:0 0 10px">두실장이 공식 홈페이지를 보고 정리한 골프장 목록(남부 베트남 등)을 앱에 넣어요. 이미 있는 골프장은 건드리지 않고 새 골프장만 추가해요. 인터넷이 필요해요.</p>'
+    + '<button class="btn" data-a="loadpack" '+(packBusy?'disabled':'')+' style="width:100%">'+(packBusy ? '불러오는 중…' : '골프장 목록 불러오기')+'</button>'
+    + (packMsg ? '<p class="note" style="margin:8px 0 0">'+esc(packMsg)+'</p>' : '') + '</div>';
   h += '<div class="card" style="margin-bottom:12px"><div style="font-weight:600;margin-bottom:6px">저장 현황</div><p class="note" style="margin:0">라운드 <b class="num" style="color:var(--ink)">'+nR+'</b> · 골프장 <b class="num" style="color:var(--ink)">'+nC+'</b> · 회원 <b class="num" style="color:var(--ink)">'+nM+'</b> · 사진 <b class="num" style="color:var(--ink)">'+nP+'</b><br>저장 방식: '+(store && store.kind === "idb" ? "기기 내부 데이터베이스" : "브라우저 간이 저장")+(usageTxt ? ' · '+esc(usageTxt) : '')+'</p></div>';
   const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
   h += '<div class="card" style="margin-bottom:12px"><div style="font-weight:600;margin-bottom:6px">홈 화면에 추가</div>';
@@ -866,6 +869,30 @@ async function importData(mode){
     if (p.myName) { myName = p.myName; try { localStorage.setItem("golf-myname", myName); } catch(e){} }
     impPending = null; impMsg = mode === "replace" ? "파일 내용으로 모두 바꿨어요." : "파일 내용을 합쳤어요."; await reloadAll(); toast("가져왔어요"); }
   catch(e) { impMsg = "가져오지 못했어요: " + (e && e.message || e); render(); }
+}
+/* 내장 골프장 목록 (app/data/courses_pack.json) 불러오기: 새 골프장만 추가, 기존 것은 유지 */
+async function loadPack(){
+  packBusy = true; packMsg = ""; render();
+  try {
+    const r = await fetch("data/courses_pack.json", { cache: "no-store" }); if (!r.ok) throw new Error("http " + r.status);
+    const pack = await r.json(); const list = pack && pack.courses ? Object.entries(pack.courses) : [];
+    let added = 0, kept = 0, fixed = 0, bad = 0;
+    for (const [id, c] of list) {
+      const nines = (Array.isArray(c.nines) ? c.nines : []).map(n => ({ name: String(n.name||"").trim(), par: (Array.isArray(n.par)?n.par:[]).map(Number), checked: n.checked !== false })).filter(n => n.name && n.par.length === 9 && n.par.every(p => p >= 3 && p <= 6));
+      if (!id || !c.name || !nines.length) { bad++; continue; }
+      if (courses[id]) {
+        // 이미 있는 골프장: 아직 확인 안 된(?) 코스만 목록의 확인된 값으로 고친다. 사용자가 확인 저장한 코스는 그대로.
+        const ex = clone(courses[id]); let ch = 0;
+        nines.filter(n => n.checked).forEach(n => { const o = (ex.nines||[]).find(x => norm(x.name) === norm(n.name)); if (o && o.checked !== true && (o.par.join() !== n.par.join() || !o.checked)) { o.par = n.par.slice(); o.checked = true; ch++; } });
+        if (ch) { ex.updatedAt = Date.now(); delete ex.id; await cstore.save(id, ex); courses[id] = ex; fixed++; } else kept++;
+        continue;
+      }
+      const body = { name: String(c.name), nameKo: String(c.nameKo||""), region: String(c.region||""), aliases: Array.isArray(c.aliases) ? c.aliases.map(String) : [], nines, updatedAt: Date.now(), pack: pack.updatedAt || "" };
+      await cstore.save(id, body); courses[id] = body; added++;
+    }
+    packMsg = (pack.name ? pack.name + " (" + (pack.updatedAt||"") + "): " : "") + "새로 추가 " + added + " · 이미 있음 " + kept + (fixed ? " · 파 확인·보정 " + fixed : "") + (bad ? " · 건너뜀 " + bad : "") + ". 새 라운드에서 골프장 검색에 바로 나와요.";
+  } catch(e) { packMsg = !navigator.onLine ? "인터넷에 연결되어 있지 않아요." : "목록을 받지 못했어요. 잠시 후 다시 시도해 주세요."; }
+  packBusy = false; if (view === "list" && home === "settings") render();
 }
 async function hcpPhotoStore(file){
   memBusy = true; memMsg = ""; render();
@@ -1039,6 +1066,7 @@ app.addEventListener("click", async e => {
   else if (a === "impreplace") { await importData("replace"); }
   else if (a === "impcancel") { impPending = null; impMsg = ""; render(); }
   else if (a === "install") { if (installEvt) { const ev = installEvt; installEvt = null; ev.prompt(); try { await ev.userChoice; } catch(e){} render(); } }
+  else if (a === "loadpack") { if (!packBusy) loadPack(); }
   else if (a === "clearask") { clearAsk = true; render(); }
   else if (a === "clearno") { clearAsk = false; render(); }
   else if (a === "clearall") { try { await AppStorage.clearAll(); clearAsk = false; cur = null; await reloadAll(); toast("모두 지웠어요"); } catch(e) { toast("지우지 못했어요"); render(); } }
