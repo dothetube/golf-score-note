@@ -1,0 +1,727 @@
+{
+ "name": "남부 베트남 골프장 (호치민·빈즈엉·동나이·붕따우·호짬)",
+ "updatedAt": "2026-10-27",
+ "courses": {
+  "long-thanh": {
+   "name": "Long Thanh Golf Club",
+   "nameKo": "롱탄",
+   "region": "Dong Nai (Bien Hoa)",
+   "aliases": [
+    "롱탄골프",
+    "롱탄 골프클럽",
+    "Long Thanh Golf Resort",
+    "Long Thanh Golf Club & Residential Estate",
+    "Sân golf Long Thành"
+   ],
+   "nines": [
+    {
+     "name": "Hill OUT",
+     "par": [
+      4,
+      4,
+      4,
+      3,
+      5,
+      4,
+      5,
+      3,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://longthanhgolfresort.com/pictures/golfing/hillscore-l.jpg"
+    },
+    {
+     "name": "Hill IN",
+     "par": [
+      4,
+      5,
+      3,
+      4,
+      4,
+      5,
+      4,
+      3,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://longthanhgolfresort.com/pictures/golfing/hillscore-l.jpg"
+    },
+    {
+     "name": "Lake OUT",
+     "par": [
+      4,
+      4,
+      3,
+      5,
+      4,
+      5,
+      4,
+      3,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://longthanhgolfresort.com/pictures/golfing/lakescore-l.jpg"
+    },
+    {
+     "name": "Lake IN",
+     "par": [
+      4,
+      5,
+      4,
+      4,
+      3,
+      4,
+      3,
+      5,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://longthanhgolfresort.com/pictures/golfing/lakescore-l.jpg"
+    }
+   ],
+   "notes": "36 holes: Hill Course (Sân Đồi) + Lake Course (Sân Hồ), each par 72 (36/36). Read from the official scorecard images linked on https://longthanhgolfresort.com/choi-golf.html. Hill cross-checked with golfingrecord.com (matches all 18); Lake cross-checked with kimigolf.com (8 holes stated, all match)."
+  },
+  "song-be": {
+   "name": "Song Be Golf Resort",
+   "nameKo": "송베",
+   "region": "Binh Duong (Thuan An)",
+   "aliases": [
+    "송베 골프",
+    "쏭베",
+    "Sông Bé",
+    "Palm Song Be"
+   ],
+   "nines": [
+    {
+     "name": "Lotus",
+     "par": [
+      5,
+      4,
+      4,
+      5,
+      3,
+      4,
+      4,
+      4,
+      3
+     ],
+     "checked": true,
+     "sourceUrl": "https://songbegolf.com.vn/san-golf.html"
+    },
+    {
+     "name": "Palm",
+     "par": [
+      4,
+      3,
+      4,
+      5,
+      4,
+      4,
+      4,
+      3,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": "https://songbegolf.com.vn/san-golf.html"
+    },
+    {
+     "name": "Desert",
+     "par": [
+      5,
+      3,
+      4,
+      4,
+      4,
+      3,
+      4,
+      4,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": "https://songbegolf.com.vn/san-golf.html"
+    }
+   ],
+   "notes": "27 holes, 77 Dai Lo Binh Duong, Lai Thieu, Thuan An. All three nines par 36. Official course page prints the nines in Vietnamese as SAN HOA SEN (Lotus), SAN CAY CO (Palm), SAN SA MAC (Desert); English names Lotus/Palm/Desert are used on the resort's English scorecard (official scorecard PDF Sep-2025: https://songbegolf.com.vn/pictures/files/golf/the-diem-moi-2025/scorecard-9-25.pdf). Cross-checked with golfingrecord.com Lotus-Palm (https://www.golfingrecord.com/golf-scorecard/4b6df96f-530f-4632-a3c6-e5c5f90d222a) and Palm-Desert (https://www.golfingrecord.com/golf-scorecard/4b40c112-04ef-4a86-83d5-0731417dcaba) - identical."
+  },
+  "tan-son-nhat": {
+   "name": "Tan Son Nhat Golf Course",
+   "nameKo": "탄손녓",
+   "region": "Ho Chi Minh City (Tan Binh)",
+   "aliases": [
+    "탄손낫",
+    "탄손넛",
+    "TSN",
+    "Tân Sơn Nhất"
+   ],
+   "nines": [
+    {
+     "name": "A",
+     "par": [
+      4,
+      4,
+      5,
+      4,
+      3,
+      4,
+      5,
+      3,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://www.tansonnhatgolf.vn/"
+    },
+    {
+     "name": "B",
+     "par": [
+      4,
+      5,
+      4,
+      3,
+      4,
+      3,
+      4,
+      4,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": "https://www.tansonnhatgolf.vn/"
+    },
+    {
+     "name": "C",
+     "par": [
+      4,
+      5,
+      4,
+      3,
+      4,
+      4,
+      4,
+      3,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": "https://www.tansonnhatgolf.vn/"
+    },
+    {
+     "name": "D",
+     "par": [
+      4,
+      5,
+      4,
+      4,
+      3,
+      5,
+      4,
+      3,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://www.tansonnhatgolf.vn/"
+    }
+   ],
+   "notes": "36 holes, four nines A/B/C/D, each par 36. PAR read from the hole-by-hole tabs on the official homepage https://www.tansonnhatgolf.vn/ (tansonnhatgolf.com has a broken TLS certificate). Cross-checked: A and B match shotnavi.jp (https://shotnavi.jp/world/704/7/gc_3.htm); C and D match golfingrecord.com C/D card (https://www.golfingrecord.com/golf-scorecard/bbf74a97-7747-2080-3ca7-cdc5a5bf3717). No disagreements."
+  },
+  "twin-doves": {
+   "name": "Twin Doves Golf Club",
+   "nameKo": "트윈도브스",
+   "region": "Binh Duong (Thu Dau Mot)",
+   "aliases": [
+    "트윈도브",
+    "트윈 도브스",
+    "스텔라",
+    "솔레",
+    "루나",
+    "빈즈엉"
+   ],
+   "nines": [
+    {
+     "name": "Stella",
+     "par": [
+      4,
+      4,
+      4,
+      4,
+      3,
+      5,
+      4,
+      4,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": ""
+    },
+    {
+     "name": "Sole",
+     "par": [
+      4,
+      4,
+      3,
+      4,
+      4,
+      4,
+      5,
+      3,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": ""
+    },
+    {
+     "name": "Luna",
+     "par": [
+      4,
+      5,
+      4,
+      4,
+      3,
+      4,
+      4,
+      3,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": ""
+    }
+   ],
+   "notes": ""
+  },
+  "vietnam-golf-cc": {
+   "name": "Vietnam Golf & Country Club",
+   "nameKo": "베트남 골프 앱 컨트리 클럽",
+   "region": "Ho Chi Minh City (Thu Duc)",
+   "aliases": [
+    "VGCC",
+    "투둑",
+    "베트남cc",
+    "베트남골프"
+   ],
+   "nines": [
+    {
+     "name": "East OUT",
+     "par": [
+      5,
+      4,
+      3,
+      4,
+      4,
+      5,
+      4,
+      3,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": ""
+    },
+    {
+     "name": "East IN",
+     "par": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      4,
+      5,
+      3,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": ""
+    },
+    {
+     "name": "West OUT",
+     "par": [
+      5,
+      4,
+      3,
+      4,
+      4,
+      5,
+      3,
+      4,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": ""
+    },
+    {
+     "name": "West IN",
+     "par": [
+      4,
+      4,
+      3,
+      5,
+      4,
+      4,
+      3,
+      5,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": ""
+    }
+   ],
+   "notes": ""
+  },
+  "harmonie-golf-park": {
+   "name": "Harmonie Golf Park",
+   "nameKo": "하모니 골프파크",
+   "region": "Binh Duong (Thu Dau Mot / Ben Cat)",
+   "aliases": [
+    "하모니",
+    "하모니 골프",
+    "Harmonie Binh Duong"
+   ],
+   "nines": [
+    {
+     "name": "Lani",
+     "par": [
+      5,
+      3,
+      4,
+      4,
+      4,
+      4,
+      3,
+      5,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://harmoniegolfpark.com/golf/"
+    },
+    {
+     "name": "Dani",
+     "par": [
+      4,
+      4,
+      3,
+      5,
+      4,
+      4,
+      3,
+      4,
+      5
+     ],
+     "checked": true,
+     "sourceUrl": "https://harmoniegolfpark.com/golf/"
+    }
+   ],
+   "notes": "18 holes (Jim Engh design), 469 Tran Ngoc Len, Dinh Hoa ward, Thu Dau Mot (directories list Thu Dau Mot rather than Ben Cat). Both nines par 36, course par 72. Official course page https://harmoniegolfpark.com/golf/ labels holes 1-9 'Lani' and 10-18 'Dani' (hole links 'Lani 1 Par 5' ... 'Dani 9 Par 5'). Pars cross-checked with golfpass.com scorecard (5-3-4-4-4-4-3-5-4 / 4-4-3-5-4-4-3-4-5) - identical. Disagreement: shotnavi.jp lists the nine names the other way round (Dani = holes 1-9, Lani = 10-18); the official site's order is used here."
+  },
+  "mekong-golf-villas": {
+   "name": "Mekong Golf & Villas (Royal Island)",
+   "nameKo": "메콩 골프",
+   "region": "Binh Duong (Tan Uyen, Bach Dang island)",
+   "aliases": [
+    "메콩",
+    "로얄 아일랜드",
+    "Royal Island Golf & Villas",
+    "Mekong Golf Village"
+   ],
+   "nines": [
+    {
+     "name": "OUT",
+     "par": [
+      4,
+      5,
+      3,
+      5,
+      4,
+      4,
+      4,
+      3,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://mekonggolf.com/wp-content/uploads/2026/06/Score-Card-moi-2026.jpg"
+    },
+    {
+     "name": "IN",
+     "par": [
+      4,
+      4,
+      4,
+      5,
+      3,
+      4,
+      4,
+      5,
+      3
+     ],
+     "checked": true,
+     "sourceUrl": "https://mekonggolf.com/wp-content/uploads/2026/06/Score-Card-moi-2026.jpg"
+    }
+   ],
+   "notes": "18 holes open (54 planned), Bach Dang island, Tan Uyen, Binh Duong. Both nines par 36, course par 72. Read from the official new 2026 scorecard image on https://mekonggolf.com/golf-course-2/ (Score-Card-moi-2026.jpg, tees Black/Blue/White/Red, no nine names - OUT/IN used). Disagreement: older third-party cards (golfify.io, golfadvisor/golfpass) show hole 1 as par 5 with OUT 37 / IN 35, and shotnavi.jp shows yet another set (36/37) - these appear to predate the 2026 re-card; the official 2026 card is used. Not to be confused with Mekong Golf Village in Long An."
+  },
+  "dong-nai-golf-resort": {
+   "name": "Dong Nai Golf Resort",
+   "nameKo": "동나이",
+   "region": "Dong Nai (Trang Bom)",
+   "aliases": [
+    "동나이골프",
+    "보창 동나이",
+    "Bo Chang Dong Nai Golf Resort",
+    "Bochang Dong Nai",
+    "Song May Golf",
+    "Sân golf Sông Mây",
+    "Sân golf Đồng Nai"
+   ],
+   "nines": [
+    {
+     "name": "A",
+     "par": [
+      5,
+      4,
+      3,
+      4,
+      5,
+      3,
+      4,
+      4,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfify.io/courses/dong-nai-golf-resort-a"
+    },
+    {
+     "name": "B",
+     "par": [
+      4,
+      5,
+      4,
+      3,
+      5,
+      4,
+      4,
+      3,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfify.io/courses/dong-nai-golf-resort-b"
+    },
+    {
+     "name": "C",
+     "par": [
+      4,
+      4,
+      5,
+      3,
+      4,
+      5,
+      4,
+      3,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfify.io/courses/dong-nai-golf-resort-c"
+    }
+   ],
+   "notes": "27 holes (A/B/C), each nine par 36. Bo Chang Dong Nai Golf Resort is the same facility (Taiwanese owner Bo Chang; also called Song May). Official site dongnaigolf.com.vn has no readable scorecard (only a layout drawing), so pars come from golfify.io. A cross-checked with shotnavi.jp search snippet (matches). C: shotnavi.jp snippet lists hole 6 as par 4 (nine = 35) whereas golfify lists par 5 (594 yd) and 1golf.eu lists C as par 36 - golfify/1golf used. B hole 5/6 (5,4) from golfify page itself."
+  },
+  "taekwang-jeongsan": {
+   "name": "Taekwang Jeongsan Country Club",
+   "nameKo": "태광 정산",
+   "region": "Dong Nai (Nhon Trach)",
+   "aliases": [
+    "태광정산CC",
+    "정산CC",
+    "태광 정산 컨트리클럽",
+    "Jeongsan Country Club Vietnam",
+    "Dai Phuoc Taekwang Jeongsan",
+    "Sân golf Đại Phước"
+   ],
+   "nines": [
+    {
+     "name": "Sun",
+     "par": [
+      4,
+      5,
+      3,
+      4,
+      4,
+      5,
+      3,
+      4,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfify.io/courses/taekwang-jeongsan-country-club"
+    },
+    {
+     "name": "Moon",
+     "par": [
+      4,
+      4,
+      5,
+      4,
+      3,
+      4,
+      4,
+      3,
+      5
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfify.io/courses/taekwang-jeongsan-country-club"
+    }
+   ],
+   "notes": "18 holes, par 72 (Sun 36 / Moon 36), Ong Con Island, Dai Phuoc, Nhon Trach. Official sites (jeongsancc.com.vn = empty directory listing; taekwangjeongsan.com unreachable) gave no scorecard, so pars from golfify.io; cross-checked with golfingrecord.com (all 18 match) and shotnavi.jp search snippet (matches). Do not confuse with the separate 'Jeongsan Country Club' Star/Moon/Sun 27-hole course listed on golfpass."
+  },
+  "the-bluffs-ho-tram": {
+   "name": "The Bluffs Grand Ho Tram",
+   "nameKo": "더 블러프스 호짬",
+   "region": "Ba Ria - Vung Tau (Ho Tram)",
+   "aliases": [
+    "블러프",
+    "블러프스",
+    "호짬",
+    "Ho Tram Strip",
+    "The Bluffs Ho Tram Strip"
+   ],
+   "nines": [
+    {
+     "name": "OUT",
+     "par": [
+      4,
+      3,
+      4,
+      3,
+      5,
+      5,
+      3,
+      4,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://thebluffshotram.com/bluffs_course/"
+    },
+    {
+     "name": "IN",
+     "par": [
+      5,
+      3,
+      4,
+      4,
+      4,
+      3,
+      5,
+      4,
+      4
+     ],
+     "checked": true,
+     "sourceUrl": "https://thebluffshotram.com/bluffs_course/"
+    }
+   ],
+   "notes": "Par 71: OUT 35, IN 36. Read from official course page https://thebluffshotram.com/bluffs_course/ (hole-by-hole). Cross-checked with golfingrecord.com scorecard (https://www.golfingrecord.com/golf-scorecard/18a79b31-82a2-476c-af0e-585cbd461eed), identical for Gold/Blue/White tees. Red (ladies) tee is listed as par 73 on third-party card; not used. Greg Norman links course, Xuyen Moc district."
+  },
+  "paradise-golf-vung-tau": {
+   "name": "Paradise Golf Vung Tau",
+   "nameKo": "붕따우 파라다이스",
+   "region": "Ba Ria - Vung Tau (Vung Tau city)",
+   "aliases": [
+    "파라다이스",
+    "붕따우",
+    "Vung Tau Paradise",
+    "CLB Golf Vung Tau Paradise"
+   ],
+   "nines": [
+    {
+     "name": "A",
+     "par": [
+      4,
+      3,
+      4,
+      4,
+      5,
+      4,
+      5,
+      4,
+      3
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/6acb7031-7123-4c69-a4c0-967fef04802b"
+    },
+    {
+     "name": "B",
+     "par": [
+      4,
+      4,
+      3,
+      4,
+      5,
+      4,
+      3,
+      5,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/ceb94b3c-aa00-4e27-93a6-dcbe14623928"
+    },
+    {
+     "name": "C",
+     "par": [
+      5,
+      4,
+      3,
+      4,
+      5,
+      4,
+      4,
+      3,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/eca21e76-9460-4413-88e7-e755169e625e"
+    }
+   ],
+   "notes": "27 holes, each nine par 36 (A+B = par 72 is the usual 18). No reachable official website (paradisegolfvungtau.com does not resolve). Pars read from golfingrecord.com cards A/B/C. A and B cross-checked with hole19golf.com 'Combination A-B' card (https://www.hole19golf.com/courses/vung-tau-paradise-resort-golf-club) - identical. C could not be cross-checked (golfify.io and shotnavi.jp returned 403); golfify/shotnavi summaries confirm C totals 36. Some sites describe the nines as Lake/Ocean/Mountain, but all scorecards print A/B/C."
+  },
+  "chau-duc-golf": {
+   "name": "Chau Duc Golf",
+   "nameKo": "쩌우득 골프",
+   "region": "Ba Ria - Vung Tau (Chau Duc)",
+   "aliases": [
+    "쩌우득",
+    "차우득",
+    "짜우득",
+    "Sonadezi Chau Duc",
+    "Sonadezi Chau Duc Golf Course"
+   ],
+   "nines": [
+    {
+     "name": "OUT",
+     "par": [
+      5,
+      4,
+      3,
+      4,
+      4,
+      3,
+      4,
+      4,
+      5
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.hole19golf.com/courses/sonadezi-chau-duc-golf-course"
+    },
+    {
+     "name": "IN",
+     "par": [
+      4,
+      4,
+      5,
+      3,
+      4,
+      5,
+      4,
+      3,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.hole19golf.com/courses/sonadezi-chau-duc-golf-course"
+    }
+   ],
+   "notes": "Par 72 (36/36). Resort Course (18 holes, opened Nov 2023, Greg Norman design, Suoi Nghe commune). No official website found. Pars read from hole19golf.com. OUT cross-checked with shotnavi.jp summary (https://shotnavi.jp/world/704/12/gc_3.htm: 5,4,3,4,4,3,4,4,5) - identical; IN only confirmed as total 36 by shotnavi, hole-by-hole from hole19 only. A second 18 (Tournament Course) is planned but not open."
+  }
+ }
+}
