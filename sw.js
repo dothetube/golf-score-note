@@ -1,6 +1,6 @@
 /* 서비스 워커: 앱 파일을 기기에 캐시해 오프라인에서도 열리게 한다.
  * 앱 파일을 고쳐서 다시 올릴 때는 아래 VERSION 을 올려야 휴대폰이 새 파일을 받는다. */
-const VERSION = "2026-10-27c";
+const VERSION = "2026-10-27d";
 const CACHE = "round-score-note-" + VERSION;
 const SHELL = ["./", "./index.html", "./css/style.css", "./js/config.js", "./js/storage.js", "./js/app.js", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./icons/apple-touch-icon.png"];
