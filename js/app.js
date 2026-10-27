@@ -419,6 +419,13 @@ function renderAddClub(){
       + (photoOK ? '<label class="btn" for="c-photo" style="width:100%;margin-top:8px">스코어카드 사진으로 읽기</label><input type="file" id="c-photo" accept="image/*" hidden>' : '')
       + (f.msg ? '<p class="note">'+esc(f.msg)+'</p>' : '') + '</div>';
   }
+  if (GOLF_API) {
+    h += '<div class="card" style="margin-bottom:12px"><div style="font-weight:600;margin-bottom:4px">골프장 데이터베이스에서 찾기</div><p class="note" style="margin:0 0 10px">전세계 3만 곳 자료(GolfCourseAPI)에서 찾아 코스와 홀별 파를 채워요. 인터넷이 필요하고, 자료가 틀릴 수 있으니 저장 전에 스코어카드와 비교해 주세요.</p>'
+      + '<div style="display:flex;gap:6px"><input type="search" id="c-api" value="'+esc(f.apiQ ?? (f.name||""))+'" placeholder="골프장 영문 이름 (예: Twin Doves)" autocomplete="off" style="flex:1;min-width:0"><button type="button" class="btn" data-a="apisearch" '+(f.apiBusy?'disabled':'')+'>'+(f.apiBusy?'찾는 중…':'찾기')+'</button></div>';
+    if (f.apiRes && f.apiRes.length) h += '<div class="results">'+f.apiRes.map(c => '<button type="button" class="club" data-a="apipick" data-id="'+esc(c.id)+'"><b>'+esc(c.club)+(c.course && c.course !== c.club ? ' <span class="ko">'+esc(c.course)+'</span>' : '')+'</b><span>'+esc(c.where)+'</span></button>').join("")+'</div>';
+    if (f.apiMsg) h += '<p class="note" style="margin:8px 0 0">'+esc(f.apiMsg)+'</p>';
+    h += '</div>';
+  }
   h += '<div class="card"><div class="field"><label for="c-name">골프장 이름</label><input type="text" id="c-name" value="'+esc(f.name)+'" placeholder="Twin Doves Golf Club"></div>'
     + '<div class="players" style="margin-bottom:14px"><div class="field" style="margin:0"><label for="c-ko">한글 이름 (선택)</label><input type="text" id="c-ko" value="'+esc(f.nameKo)+'" placeholder="트윈도브스"></div><div class="field" style="margin:0"><label for="c-region">지역 (선택)</label><input type="text" id="c-region" value="'+esc(f.region)+'" placeholder="Binh Duong"></div></div>';
   f.nines.forEach((n,i) => {
@@ -454,6 +461,54 @@ async function lookupClub(){
       : e && e.code === "rate_limited" ? "잠시 후 다시 시도해 주세요." : e && e.code === "invalid_json" ? "답을 읽지 못했어요. 한 번 더 눌러 보세요." : "찾지 못했어요. 다시 시도하거나 직접 입력해 주세요.";
   }
   addForm.busy = false; if (view === "addclub") render();
+}
+/* ---------- 골프장 데이터베이스 (중계 서버 → GolfCourseAPI) ---------- */
+const GOLF_API = (window.GOLF_API_BASE || "").replace(/\/$/, "");
+async function apiFetch(path){
+  const r = await fetch(GOLF_API + path, { headers: { "Accept": "application/json" } });
+  if (r.status === 429) throw { code: "rate_limited" };
+  if (!r.ok) throw { code: "http", status: r.status };
+  return r.json();
+}
+async function apiSearch(){
+  readClubInputs(); const q = ((document.getElementById("c-api") || {}).value || "").trim(); addForm.apiQ = q;
+  if (q.length < 2) { addForm.apiMsg = "골프장 이름을 두 글자 이상 입력하세요."; render(); return; }
+  addForm.apiBusy = true; addForm.apiMsg = ""; addForm.apiRes = null; render();
+  try {
+    const r = await apiFetch("/search?q=" + encodeURIComponent(q));
+    const list = (r && Array.isArray(r.courses) ? r.courses : []).map(c => { const L = c.location || {};
+      return { id: c.id, club: String(c.club_name || ""), course: String(c.course_name || ""), where: [L.city, L.state, L.country].filter(Boolean).join(", ") }; }).filter(c => c.id && c.club);
+    addForm.apiRes = list.slice(0, 15);
+    addForm.apiMsg = list.length ? list.length + "곳 찾음. 골프장을 누르면 코스·파가 채워져요." : '"' + q + '"에 맞는 골프장이 없어요. 영문 이름을 다르게 써 보거나 직접 입력해 주세요.';
+  } catch(e) {
+    addForm.apiMsg = e && e.code === "rate_limited" ? "오늘 조회 한도를 다 썼어요. 내일 다시 시도하거나 직접 입력해 주세요." : !navigator.onLine ? "인터넷에 연결되어 있지 않아요." : "찾지 못했어요. 잠시 후 다시 시도해 주세요.";
+  }
+  addForm.apiBusy = false; if (view === "addclub") render();
+}
+function teeToNines(course, nineName){
+  const tees = course.tees || {}; const all = [].concat(tees.male || [], tees.female || [], Array.isArray(tees) ? tees : []);
+  const usable = all.filter(t => Array.isArray(t.holes) && t.holes.length >= 9 && t.holes.every(h => +h.par >= 3 && +h.par <= 6));
+  if (!usable.length) return [];
+  const pref = ["white", "blue", "regular", "men", "yellow", "gold", "black"];
+  usable.sort((a,b) => { const ia = pref.findIndex(p => String(a.tee_name||"").toLowerCase().includes(p)), ib = pref.findIndex(p => String(b.tee_name||"").toLowerCase().includes(p)); return (ia<0?99:ia) - (ib<0?99:ib); });
+  const holes = usable[0].holes.map(h => +h.par); const nines = [];
+  for (let i = 0; i + 9 <= holes.length && nines.length < 4; i += 9) nines.push({ name: ["OUT","IN","3rd","4th"][nines.length], par: holes.slice(i, i+9) });
+  if (nines.length === 1 && nineName) nines[0].name = nineName;
+  return nines;
+}
+async function apiPick(id){
+  readClubInputs(); addForm.apiBusy = true; addForm.apiMsg = ""; render();
+  try {
+    const r = await apiFetch("/course/" + encodeURIComponent(id)); const c = (r && r.course) || r || {};
+    const L = c.location || {};
+    const club = String(c.club_name || "").trim(), cnameRaw = String(c.course_name || "").trim();
+    let cname = cnameRaw; if (club && cname.toLowerCase().startsWith(club.toLowerCase())) cname = cname.slice(club.length).replace(/^[\s\-–:]+/, "").trim();
+    const nines = teeToNines(c, cname && cname.toLowerCase() !== club.toLowerCase() ? cname : "");
+    const n = applyNines({ club, region: [L.city, L.country].filter(Boolean).join(", "), nines }, "lookup");
+    if (n) { addForm.apiRes = null; addForm.apiMsg = n + "개 9홀 코스를 채웠어요. 코스 이름은 스코어카드에 적힌 이름으로 고쳐도 돼요 (9홀씩 따로 등록된 골프장은 '+ 9홀 코스 추가'로 다른 코스를 손으로 더 넣을 수 있어요). 숫자를 확인하고 아래 '골프장 저장'을 누르세요."; }
+    else addForm.apiMsg = "이 골프장은 홀별 파 자료가 없어요. 직접 입력해 주세요.";
+  } catch(e) { addForm.apiMsg = e && e.code === "rate_limited" ? "오늘 조회 한도를 다 썼어요. 내일 다시 시도해 주세요." : "자료를 받지 못했어요. 잠시 후 다시 시도해 주세요."; }
+  addForm.apiBusy = false; if (view === "addclub") render();
 }
 async function shrink(file, max, q){
   const url = URL.createObjectURL(file);
@@ -873,6 +928,8 @@ app.addEventListener("click", async e => {
   else if (a === "vadd") { const v = setup.verify[+b.dataset.i]; readSetupInputs();
     try { await saveNine(setup.clubId, v.name, v.par); v.found = v.name; v.same = true; v.done = true; toast(v.name+" 코스를 추가했어요"); } catch(e) { toast("저장하지 못했어요"); } render(); }
   else if (a === "lookup") { if (!addForm.busy) lookupClub(); }
+  else if (a === "apisearch") { if (!addForm.apiBusy) apiSearch(); }
+  else if (a === "apipick") { if (!addForm.apiBusy) apiPick(b.dataset.id); }
   else if (a === "cpar") { readClubInputs(); addForm.fromLookup = false; const n = addForm.nines[+b.dataset.n]; const i = +b.dataset.i; n.par[i] = n.par[i] >= 5 ? 3 : n.par[i] + 1; render(); }
   else if (a === "addnine") { readClubInputs(); addForm.nines.push({ name: "", par: Array(9).fill(4) }); render(); }
   else if (a === "rmnine") { readClubInputs(); addForm.nines.splice(+b.dataset.i, 1); render(); }
@@ -1007,6 +1064,7 @@ app.addEventListener("compositionend", e => {
 });
 app.addEventListener("keydown", e => {
   if (e.target.id === "c-look" && e.key === "Enter") { e.preventDefault(); if (addForm && !addForm.busy) lookupClub(); }
+  if (e.target.id === "c-api" && e.key === "Enter") { e.preventDefault(); if (addForm && !addForm.apiBusy) apiSearch(); }
   if (e.target.id === "f-q" && e.key === "Enter") { e.preventDefault(); const first = app.querySelector("[data-a=club]"); if (first) first.click(); }
 });
 app.addEventListener("change", e => {
