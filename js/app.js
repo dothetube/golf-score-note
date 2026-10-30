@@ -710,24 +710,28 @@ function renderCard(){
       + olyForm(cur.oly, "e")
       + '<div class="row-actions"><button class="btn primary" data-a="saveinfo">저장</button><button class="btn" data-a="cancelinfo">취소</button></div></div>';
   }
-  h += '<div class="row-actions"><button class="btn primary" data-a="img">이미지 저장 · 공유</button><button class="btn" data-a="copy">텍스트 복사</button>' + (editInfo ? '' : '<button class="btn" data-a="editinfo">정보 수정</button>')
+  h += '<div class="row-actions"><button class="btn primary" data-a="img" data-k="card">스코어카드 이미지</button>' + ((cur.hcp||[]).some(v => v != null) || (cur.oly && cur.oly.unit > 0) ? '<button class="btn primary" data-a="img" data-k="bet">내기 결과 이미지</button>' : '') + '<button class="btn" data-a="copy">텍스트 복사</button>' + (editInfo ? '' : '<button class="btn" data-a="editinfo">정보 수정</button>')
     + (confirmDel ? '<button class="btn danger" data-a="del">정말 삭제</button><button class="btn" data-a="nodel">취소</button>' : '<button class="btn danger" data-a="askdel">라운드 삭제</button>') + '</div>';
   h += '<div id="imgbox" hidden style="margin-top:12px"><p class="note" style="margin:0 0 6px" id="imgnote"></p><img id="imgout" alt="라운드 결과 이미지" style="width:100%;border-radius:10px;border:1px solid var(--line)"></div>';
   h += '<textarea id="copybox" readonly hidden style="width:100%;height:140px;margin-top:10px;font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:10px"></textarea>';
   app.innerHTML = '<div class="wrap">'+h+'</div>';
   fixStatus();
 }
+const IMG_F = '"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif', IMG_D = '"Barlow Condensed",'+IMG_F;
+function imgHeader(g, W, H){
+  g.fillStyle = "#F3F5F1"; g.fillRect(0,0,W,H);
+  g.fillStyle = "#1E5B43"; g.fillRect(0,0,W,92);
+  g.fillStyle = "#fff"; g.font = "600 24px "+IMG_F; g.fillText((cur.club||"")||(cur.front.name+" · "+cur.back.name), 24, 40);
+  g.font = "400 15px "+IMG_F; g.fillStyle = "rgba(255,255,255,.85)";
+  g.fillText((cur.event?cur.event+"  ·  ":"")+(cur.date||"").replace(/-/g,".")+"  ·  "+cur.front.name+" / "+cur.back.name+(cur.teeOff?"  ·  "+cur.teeOff:"")+"  ·  PAR "+pars(cur).reduce((a,b)=>a+b,0), 24, 68);
+}
 function resultImage(){
-  const S = 2, W = 540; const rk = ranked(cur); const P = pars(cur);
+  const S = 2, W = 540; const rk = ranked(cur);
   const rows = 1 + cur.players.length; const tH = 28, rowH = 34;
   const H = 150 + rk.length*44 + 2*(24 + tH + rows*rowH + 16) + 40;
   const c = document.createElement("canvas"); c.width = W*S; c.height = H*S; const g = c.getContext("2d"); g.scale(S,S);
-  const F = '"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif', D = '"Barlow Condensed",'+F;
-  g.fillStyle = "#F3F5F1"; g.fillRect(0,0,W,H);
-  g.fillStyle = "#1E5B43"; g.fillRect(0,0,W,92);
-  g.fillStyle = "#fff"; g.font = "600 24px "+F; g.fillText((cur.club||"")||(cur.front.name+" · "+cur.back.name), 24, 40);
-  g.font = "400 15px "+F; g.fillStyle = "rgba(255,255,255,.85)";
-  g.fillText((cur.event?cur.event+"  ·  ":"")+(cur.date||"").replace(/-/g,".")+"  ·  "+cur.front.name+" / "+cur.back.name+(cur.teeOff?"  ·  "+cur.teeOff:"")+"  ·  PAR "+P.reduce((a,b)=>a+b,0), 24, 68);
+  const F = IMG_F, D = IMG_D;
+  imgHeader(g, W, H);
   let y = 112;
   g.fillStyle = "#66706A"; g.font = "500 12px "+F; g.fillText("순위", 24, y); y += 10;
   rk.forEach((s,k) => {
@@ -772,15 +776,68 @@ function resultImage(){
   g.fillStyle = "#97A39C"; g.font = "400 11px "+F; g.fillText("라운드 스코어 노트", 24, H-14);
   return c;
 }
+/* 내기 결과 이미지: 핸디 순위(네트) + 올림픽 정산. 아직 집계할 내용이 없으면 null */
+function betImage(){
+  const S = 2, W = 540, x0 = 24, tW = W-48, tH = 28, rowH = 34, F = IMG_F, D = IMG_D;
+  const fmt = v => Number.isInteger(v) ? String(v) : v.toFixed(1);
+  const st = stats(cur), hasH = (cur.hcp||[]).some(v => v != null);
+  const nets = !hasH ? [] : [["전반",s=>s.fn===9?s.f:null,0.5],["후반",s=>s.bn===9?s.b:null,0.5],["전체",s=>s.n===18?s.st:null,1]].map(([lab,get,m]) => ({ lab,
+    rows: st.map(s => { const gr = get(s), hc = (cur.hcp||[])[s.i]; return gr != null && hc != null ? { n: s.name, gr, hc: hc*m, net: gr - hc*m } : null; }).filter(Boolean).sort((a,b)=>a.net-b.net || (tieHigh ? b.hc-a.hc : a.hc-b.hc)) })).filter(t => t.rows.length);
+  const os = cur.oly && cur.oly.unit > 0 ? olyStats() : null, hasO = !!os && os.some(r => r.n);
+  if (!nets.length && !hasO) return null;
+  const sec = n => 24 + tH + n*rowH + 16;
+  const H = 146 + nets.reduce((a,t)=>a+sec(t.rows.length),0) + (nets.length ? 22 : 0) + (hasO ? sec(os.length)+22 : 0) + 30;
+  const c = document.createElement("canvas"); c.width = W*S; c.height = H*S; const g = c.getContext("2d"); g.scale(S,S);
+  imgHeader(g, W, H);
+  g.fillStyle = "#1C2420"; g.font = "600 16px "+F; g.fillText("내기 결과", x0, 120);
+  let y = 134;
+  const cell = (t, x, w, align, font, color) => { // 칸보다 긴 글자는 줄여서 넣는다
+    let size = font[1]; g.font = font[0]+" "+size+"px "+font[2];
+    while (size > 9 && g.measureText(t).width > w-12) { size--; g.font = font[0]+" "+size+"px "+font[2]; }
+    if (g.measureText(t).width > w-12) { while (t.length > 1 && g.measureText(t+"…").width > w-12) t = t.slice(0,-1); t += "…"; }
+    g.fillStyle = color; g.textAlign = align; g.fillText(t, align === "left" ? x+10 : x+w/2, y);
+  };
+  const table = (title, cols, rows) => {
+    g.textAlign = "left"; g.fillStyle = "#1C2420"; g.font = "600 14px "+F; g.fillText(title, x0, y+14); y += 24;
+    g.fillStyle = "#fff"; roundRect(g, x0, y, tW, tH+rows.length*rowH, 8); g.fill();
+    g.fillStyle = "#EEF1EC"; g.fillRect(x0, y, tW, tH);
+    const yTop = y; let x = x0; y = yTop+18;
+    cols.forEach(co => { cell(co.t, x, co.w, co.a, ["500",12,F], "#66706A"); x += co.w; });
+    rows.forEach((r,ri) => { const ry = yTop+tH+rowH*ri;
+      if (r.hi) { g.fillStyle = "#E3EEE7"; g.fillRect(x0, ry, tW, rowH); }
+      g.strokeStyle = "#E4E8E1"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, ry); g.lineTo(x0+tW, ry); g.stroke();
+      x = x0; y = ry+23;
+      r.cells.forEach((v,k) => { cell(v[0], x, cols[k].w, cols[k].a, v[1], v[2]); x += cols[k].w; });
+    });
+    g.textAlign = "left"; y = yTop+tH+rows.length*rowH+16;
+  };
+  const note = t => { g.fillStyle = "#66706A"; g.font = "400 11px "+F; g.fillText(t, x0, y+2); y += 22; };
+  const NUM = ["500",16,D], BOLD = ["700",16,D], INK = "#1C2420", MUTED = "#66706A";
+  nets.forEach(t => table("핸디 순위 · "+t.lab,
+    [{t:"순위",w:50,a:"center"},{t:"이름",w:202,a:"left"},{t:"그로스",w:80,a:"center"},{t:"핸디",w:80,a:"center"},{t:"네트",w:80,a:"center"}],
+    t.rows.map((r,k) => ({ hi: k===0, cells: [[String(k+1),BOLD,k===0?"#1E5B43":MUTED],[r.n,["600",14,F],INK],[String(r.gr),NUM,INK],["−"+fmt(r.hc),NUM,MUTED],[fmt(r.net),BOLD,INK]] }))));
+  if (nets.length) note("9홀은 핸디 절반 적용 · 동타 우선: "+(tieHigh ? "하이" : "로우")+" 핸디");
+  if (hasO) {
+    const medal = ["5","4","3","2","1"];
+    table("올림픽 · 1점 "+cur.oly.unit.toLocaleString()+" · "+(cur.oly.method==="avg"?"평균 대비":"1:1 차이")+" 정산",
+      [{t:"이름",w:110,a:"left"},{t:"득점 내역",w:190,a:"left"},{t:"3퍼+",w:42,a:"center"},{t:"점수",w:60,a:"center"},{t:"정산",w:90,a:"center"}],
+      os.map(r => { const bad = (r.cnt["3p"]||0)+(r.cnt["4p"]||0);
+        return { cells: [[r.name,["600",14,F],INK],[medal.filter(m=>r.cnt[m]).map(m => (m==="5"?"칩인":m+"점")+"×"+r.cnt[m]).join(" "),["400",12,F],INK],[bad?String(bad):"",NUM,"#B23A32"],[(r.pts>0?"+":"")+r.pts,BOLD,INK],[won(r.money),BOLD,r.money>0?"#2E7A4E":r.money<0?"#B23A32":MUTED]] }; }));
+    note((cur.oly.method==="avg" ? "정산 = (내 점수 − 평균) × 단가" : "정산 = 상대마다 (내 점수 − 상대 점수) × 단가, 합산")+" · 3퍼트 벌점 "+(cur.oly.pen==null?1:cur.oly.pen)+"점/퍼트");
+  }
+  g.fillStyle = "#97A39C"; g.font = "400 11px "+F; g.fillText("라운드 스코어 노트", 24, H-14);
+  return c;
+}
 function roundRect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 let lastBlob = null;
-async function shareImage(){
+async function shareImage(kind){
   const box = document.getElementById("imgbox"), img = document.getElementById("imgout"), note = document.getElementById("imgnote");
   try { if (document.fonts && document.fonts.load) await Promise.all([document.fonts.load('700 20px "Barlow Condensed"'), document.fonts.load('600 16px "IBM Plex Sans KR"')]); } catch(e){}
-  const c = resultImage();
+  const c = kind === "bet" ? betImage() : resultImage();
+  if (!c) { toast("아직 집계할 내기 결과가 없어요"); return; }
   const blob = await new Promise(res => c.toBlob(res, "image/png")); lastBlob = blob;
   img.src = c.toDataURL("image/png"); box.hidden = false;
-  const fname = "golf_"+(cur.date||"").replace(/-/g,"")+"_"+(cur.club||cur.front.name).replace(/[^\w가-힣]+/g,"").slice(0,20)+".png";
+  const fname = "golf_"+(cur.date||"").replace(/-/g,"")+"_"+(cur.club||cur.front.name).replace(/[^\w가-힣]+/g,"").slice(0,20)+(kind === "bet" ? "_bet" : "_scorecard")+".png";
   if (dlFn) {
     note.textContent = "공유 창이 뜨면 카카오톡을 고르거나 저장을 누르세요. 공유 창이 없는 브라우저는 다운로드 폴더에 저장돼요.";
     try { await dlFn.save({ filename: fname, data: blob }); toast("저장했어요"); note.textContent = "저장했어요. 카톡에서 사진 첨부로 보내세요. 다시 저장하려면 버튼을 한 번 더 누르세요."; }
@@ -813,7 +870,7 @@ function resultText(){
 
 
 /* ---------- 설정 · 백업 (PWA 전용 추가) ---------- */
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.1.0";
 function prefs(){ return { myName, tieHigh, relMode, memGroup }; }
 function renderSettings(){
   let h = '<header class="top"><div class="brand">'+FLAG+'라운드 스코어 노트</div><button class="btn primary" data-a="new">+ 새 라운드</button></header>' + homeTabs();
@@ -997,7 +1054,7 @@ app.addEventListener("click", async e => {
   else if (a === "setpar") setScore(+b.dataset.p, () => 0);
   else if (a === "inc") setScore(+b.dataset.p, v => (v == null ? 0 : v) + 1);
   else if (a === "dec") setScore(+b.dataset.p, v => (v == null ? 0 : v) - 1);
-  else if (a === "img") { b.disabled = true; try { await shareImage(); } catch(err) { toast("이미지를 만들지 못했어요"); } b.disabled = false; }
+  else if (a === "img") { b.disabled = true; try { await shareImage(b.dataset.k); } catch(err) { toast("이미지를 만들지 못했어요"); } b.disabled = false; }
   else if (a === "copy") {
     const txt = resultText(); const box = document.getElementById("copybox");
     try { await navigator.clipboard.writeText(txt); toast("복사했어요. 단톡방에 붙여 넣으세요."); }
