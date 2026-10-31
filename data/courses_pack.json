@@ -1,6 +1,6 @@
 {
  "name": "남부 베트남 골프장 (호치민·빈즈엉·동나이·붕따우·호짬)",
- "updatedAt": "2026-10-30",
+ "updatedAt": "2026-10-31",
  "courses": {
   "twin-doves": {
    "name": "Twin Doves Golf Club",
@@ -728,6 +728,111 @@
     }
    ],
    "notes": "18 holes, par 72 (Sun 36 / Moon 36), Ong Con Island, Dai Phuoc, Nhon Trach. Official sites (jeongsancc.com.vn = empty directory listing; taekwangjeongsan.com unreachable) gave no scorecard, so pars from golfify.io; cross-checked with golfingrecord.com (all 18 match) and shotnavi.jp search snippet (matches). Do not confuse with the separate 'Jeongsan Country Club' Star/Moon/Sun 27-hole course listed on golfpass."
+  },
+  "midas-valley-golf-club": {
+   "name": "Midas Valley Golf Club",
+   "nameKo": "청평마이다스 컨트리클럽",
+   "region": "한국 경기 가평 (청평)",
+   "aliases": [
+    "Cheongpyeong Midas CC",
+    "청평마이다스CC"
+   ],
+   "nines": [
+    {
+     "name": "OUT",
+     "par": [
+      4,
+      3,
+      4,
+      4,
+      5,
+      4,
+      3,
+      5,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/06f9cce1-782d-4b89-aca3-de2f658b0faa"
+    },
+    {
+     "name": "IN",
+     "par": [
+      4,
+      5,
+      3,
+      4,
+      5,
+      4,
+      3,
+      4,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/06f9cce1-782d-4b89-aca3-de2f658b0faa"
+    }
+   ],
+   "notes": "golfingrecord 단일 출처 (파72, 5개 티 모두 파 동일). 코스 이름이 페이지에 없어 OUT/IN 으로 표기."
+  },
+  "ananti-club-seoul": {
+   "name": "The Ananti Club Seoul",
+   "nameKo": "아난티 클럽 서울",
+   "region": "한국 경기 가평",
+   "aliases": [
+    "Ananti Club Seoul",
+    "아난티클럽 서울",
+    "Ananti Joongang"
+   ],
+   "nines": [
+    {
+     "name": "Jatnamu",
+     "par": [
+      5,
+      3,
+      4,
+      4,
+      4,
+      3,
+      4,
+      5,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/34cbf603-7103-44d7-a156-534ea2c5c7b9"
+    },
+    {
+     "name": "Jajaknamu",
+     "par": [
+      4,
+      4,
+      5,
+      3,
+      4,
+      4,
+      3,
+      4,
+      5
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/3f2c2ff7-0246-47c8-9651-6b52be5e9aa9"
+    },
+    {
+     "name": "Neutinamu",
+     "par": [
+      4,
+      4,
+      3,
+      4,
+      3,
+      4,
+      5,
+      4,
+      4
+     ],
+     "checked": false,
+     "sourceUrl": "https://www.golfingrecord.com/golf-scorecard/6d45b113-3130-4dc7-b4cf-91cc7b4a3845"
+    }
+   ],
+   "notes": "golfingrecord. Jatnamu·Neutinamu 는 같은 클럽의 중복 페이지 2개에서 파 일치. Neutinamu 는 파35 (이 9홀 조합만 합계 36 아님). 27홀, 표기는 영문 코스명 그대로."
   },
   "de-beach-golf-club": {
    "name": "De Beach Golf Club",
