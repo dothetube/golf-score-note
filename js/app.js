@@ -52,6 +52,7 @@ function onData(o){
   if (cur && !rounds[cur.id]) rounds[cur.id] = clone(cur);
   if (view !== "setup") render();
 }
+function setMembers(o){ members = {}; Object.entries(o).forEach(([id, m]) => { members[id] = Object.assign(clone(m), { id }); }); }
 function scheduleSave(){ dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 700); }
 async function flush(){
   if (saving) { saveTimer = setTimeout(flush, 400); return; }
@@ -227,7 +228,7 @@ async function hcpPhoto(file){
       memMsg = rows.length+"명 읽음 · 추가 "+added+" · 변경 "+changed+" · 동일 "+same+". 표 사진도 저장했어요.";
     }
   } catch(e) {
-    memMsg = e && e.code === "not_granted" ? "Claude 사용을 허용하지 않아 표를 읽을 수 없어요." : e && e.code === "rate_limited" ? "잠시 후 다시 시도해 주세요." : "표를 읽지 못했어요. 다시 시도해 주세요.";
+    memMsg = aiErr(e, "표를 읽지 못했어요. 다시 시도해 주세요.");
   }
   memBusy = false; if (view === "list" && home === "hcp") render();
 }
@@ -243,6 +244,12 @@ function findMember(name, group){
   const all = Object.values(members);
   if (group) { const g = all.find(m => memGroupOf(m) === group && hit(m)); if (g) return g; }
   return all.find(hit) || null;
+}
+/* 공지의 이름이 나인지: 공지에는 본명, 앱에서는 별명으로 적혀 있어도 찾는다 */
+function isMe(player){
+  const k = norm(String(player||"").replace(/\(.*?\)/g,"")); if (!k || !myName) return false;
+  const m = findMember(myName, setup && setup.group);
+  return [myName].concat(m ? [m.name, ...(m.aliases||[])] : []).some(a => norm(a) === k);
 }
 function lastHcp(name){
   if (!name) return "";
@@ -341,7 +348,7 @@ function renderSetup(){
     if (s.notice) {
       const n = s.notice;
       h += '<div class="picked" style="margin-bottom:8px"><div style="min-width:0"><b>'+esc(n.event||"모임")+'</b><span>'+esc(n.date||"")+(n.club?' · '+esc(n.club):'')+(n.lunch?' · 점심 '+esc(n.lunch):'')+'</span></div><button type="button" class="btn sm" data-a="nclear">지우기</button></div>';
-      h += '<p class="note" style="margin:0 0 6px">조를 고르면 동반자와 코스가 채워져요.</p><div class="chips">'+(n.groups||[]).map((g,i) => '<button type="button" class="chip'+(s.gi===i?' on':'')+'" data-a="ngroup" data-i="'+i+'">'+esc(g.name||((i+1)+"조"))+(g.teeOff?' '+esc(g.teeOff):'')+(myName && (g.players||[]).some(x=>x.includes(myName))?' ★':'')+'</button>').join("")+'</div>';
+      h += '<p class="note" style="margin:0 0 6px">조를 고르면 동반자와 코스가 채워져요.</p><div class="chips">'+(n.groups||[]).map((g,i) => '<button type="button" class="chip'+(s.gi===i?' on':'')+'" data-a="ngroup" data-i="'+i+'">'+esc(g.name||((i+1)+"조"))+(g.teeOff?' '+esc(g.teeOff):'')+((g.players||[]).some(isMe)?' ★':'')+'</button>').join("")+'</div>';
       if (s.gi != null && n.groups[s.gi]) { const g = n.groups[s.gi]; h += '<p class="note" style="margin:6px 0 0">'+esc((g.players||[]).join(", "))+(g.courses&&g.courses.length?' · '+esc(g.courses.join(" → ")):'')+'</p>'; }
     }
     h += '</div>';
@@ -404,19 +411,18 @@ function readSetupInputs(){
 }
 
 /* ---------- add a golf club ---------- */
-function newClubForm(){ return { name: "", look: "", nameKo: "", region: "", fromLookup: false, nines: [{ name: "", par: Array(9).fill(4) }, { name: "", par: Array(9).fill(4) }], err: "", busy: false, msg: "" }; }
+function newClubForm(){ return { name: "", nameKo: "", region: "", fromLookup: false, nines: [{ name: "", par: Array(9).fill(4) }, { name: "", par: Array(9).fill(4) }], err: "", busy: false, msg: "" }; }
 function readClubInputs(){
   const g = id => document.getElementById(id); const f = addForm;
-  if (g("c-name")) f.name = g("c-name").value; if (g("c-look")) f.look = g("c-look").value; if (g("c-ko")) f.nameKo = g("c-ko").value; if (g("c-region")) f.region = g("c-region").value;
+  if (g("c-name")) f.name = g("c-name").value; if (g("c-ko")) f.nameKo = g("c-ko").value; if (g("c-region")) f.region = g("c-region").value;
   f.nines.forEach((n,i) => { if (g("c-n"+i)) n.name = g("c-n"+i).value; });
 }
 function renderAddClub(){
   const f = addForm;
   let h = '<header class="top"><button class="btn sm" data-a="backsetup">← 뒤로</button><div class="brand">골프장 등록</div><span style="width:64px"></span></header>';
-  if (sampleFn) {
-    h += '<div class="card" style="margin-bottom:12px"><div style="font-weight:600;margin-bottom:4px">Claude에게 찾아보기</div><p class="note" style="margin:0 0 10px">골프장 이름을 넣고 누르면 Claude가 아는 범위에서 코스 이름과 홀별 파를 채워요. 인터넷을 직접 검색하는 건 아니라서 틀릴 수 있어요. 저장 전에 꼭 스코어카드와 비교해 주세요.</p>'
-      + '<div style="display:flex;gap:6px"><input type="text" id="c-look" value="'+esc(f.look||f.name)+'" placeholder="예: Long Thanh Golf Club" style="flex:1;min-width:0"><button type="button" class="btn" data-a="lookup" '+(f.busy?'disabled':'')+'>'+(f.busy?'찾는 중…':'찾기')+'</button></div>'
-      + (photoOK ? '<label class="btn" for="c-photo" style="width:100%;margin-top:8px">스코어카드 사진으로 읽기</label><input type="file" id="c-photo" accept="image/*" hidden>' : '')
+  if (photoOK) {
+    h += '<div class="card" style="margin-bottom:12px"><div style="font-weight:600;margin-bottom:4px">스코어카드 사진으로 읽기</div><p class="note" style="margin:0 0 10px">사진의 PAR 줄을 읽어 코스 이름과 홀별 파를 채워요. 저장 전에 꼭 스코어카드와 비교해 주세요.</p>'
+      + '<label class="btn" for="c-photo" style="width:100%">'+(f.busy?'사진 읽는 중…':'스코어카드 사진 올리기')+'</label><input type="file" id="c-photo" accept="image/*" hidden>'
       + (f.msg ? '<p class="note">'+esc(f.msg)+'</p>' : '') + '</div>';
   }
   if (GOLF_API) {
@@ -447,20 +453,6 @@ function applyNines(r, src){
   if (r.region && !addForm.region.trim()) addForm.region = String(r.region);
   addForm.nines = nines.slice(0,4); addForm.fromLookup = src === "lookup";
   return nines.length;
-}
-async function lookupClub(){
-  readClubInputs(); const q = (addForm.look||"").trim();
-  if (!q) { addForm.msg = "골프장 이름을 먼저 입력하세요."; render(); return; }
-  addForm.busy = true; addForm.msg = ""; render();
-  try {
-    const r = await sampleFn.json('You are a golf course database. Golf club: "'+q.replace(/"/g,"")+'". If you know this club, reply with its official English name, Korean name if commonly used, region/city, and every 9-hole course (nine) with its name as printed on the scorecard and the par of holes 1-9 (each 3-5, total usually 36). For an 18-hole course with no named nines use "OUT" and "IN". Reply with only JSON like {"club":"Long Thanh Golf Club","nameKo":"롱탄","region":"Dong Nai","nines":[{"name":"Lake OUT","par":[4,4,3,5,4,5,4,3,4]}]}. If you do not know the hole-by-hole par of this club, reply {"club":"","nines":[]} and nothing else; never guess.', { modelTier: "default" });
-    const n = applyNines(r, "lookup");
-    addForm.msg = n ? n+"개 코스를 찾았어요. Claude의 기억으로 채운 값이라 저장 뒤에도 \"?\" 표시가 붙어요. 스코어카드와 비교해서 맞으면 한 번 저장해 주세요." : "Claude가 이 골프장의 홀별 파를 알지 못해요. 사진으로 읽거나 직접 입력해 주세요.";
-  } catch(e) {
-    addForm.msg = e && e.code === "not_granted" ? "Claude 사용을 허용하지 않아 찾을 수 없어요. 직접 입력해 주세요."
-      : e && e.code === "rate_limited" ? "잠시 후 다시 시도해 주세요." : e && e.code === "invalid_json" ? "답을 읽지 못했어요. 한 번 더 눌러 보세요." : "찾지 못했어요. 다시 시도하거나 직접 입력해 주세요.";
-  }
-  addForm.busy = false; if (view === "addclub") render();
 }
 /* ---------- 골프장 데이터베이스 (중계 서버 → GolfCourseAPI) ---------- */
 const GOLF_API = (window.GOLF_API_BASE || "").replace(/\/$/, "");
@@ -551,18 +543,18 @@ async function noticePhoto(file){
       if (/^\d{4}-\d{2}-\d{2}$/.test(setup.notice.date)) setup.date = setup.notice.date;
       const cid = findClub(setup.notice.club);
       if (cid) pickClub(setup, cid); else { setup.clubId = null; setup.custom = true; setup.front = { name: "전반", par: Array(9).fill(4) }; setup.back = { name: "후반", par: Array(9).fill(4) }; }
-      const mine = myName ? groups.findIndex(g => g.players.some(x => x.includes(myName))) : -1;
+      const mine = groups.findIndex(g => g.players.some(isMe));
       setup.gi = null; if (mine >= 0) applyGroup(mine);
       setup.nmsg = (cid ? courses[cid].name+" 골프장으로 설정했어요. " : (setup.notice.club ? '"'+setup.notice.club+'" 골프장이 등록돼 있지 않아 직접 입력 상태예요. ' : "")) + (mine >= 0 ? "" : "본인 조를 선택하세요.");
     }
   } catch(e) {
-    setup.nmsg = e && e.code === "not_granted" ? "Claude 사용을 허용하지 않아 공지를 읽을 수 없어요." : e && e.code === "rate_limited" ? "잠시 후 다시 시도해 주세요." : "공지를 읽지 못했어요. 다시 시도해 주세요.";
+    setup.nmsg = aiErr(e, "공지를 읽지 못했어요. 다시 시도해 주세요.");
   }
   setup.nbusy = false; if (view === "setup") render();
 }
 function applyGroup(i){
   const g = setup.notice.groups[i]; setup.gi = i;
-  const names = g.players.slice(0,4).map(x => x.replace(/\s*\(.*?\)\s*/g,"").trim() || x); while (names.length < 4) names.push("");
+  const names = g.players.slice(0,4).map(x => isMe(x) ? myName : x.replace(/\s*\(.*?\)\s*/g,"").trim() || x); while (names.length < 4) names.push("");
   setup.players = names; setup.hcp = names.map(n => lastHcp(n)); setup.teeOff = g.teeOff || ""; setup.event = setup.notice.event || "";
   if (setup.clubId && g.courses.length) {
     const a = findNine(setup.clubId, g.courses[0]), b = findNine(setup.clubId, g.courses[1] || g.courses[0]);
@@ -587,7 +579,7 @@ async function verifyPhoto(file){
       setup.vmsg = nines.length+"개 코스를 읽었어요 · 일치 "+ok+" · 다름 "+df+(nf ? " · 미등록 "+nf : "")+". 아래에서 확인해 주세요.";
     }
   } catch(e) {
-    setup.vmsg = e && e.code === "not_granted" ? "Claude 사용을 허용하지 않아 사진을 읽을 수 없어요." : e && e.code === "rate_limited" ? "잠시 후 다시 시도해 주세요." : "사진을 읽지 못했어요. 다시 시도해 주세요.";
+    setup.vmsg = aiErr(e, "사진을 읽지 못했어요. 다시 시도해 주세요.");
   }
   setup.vbusy = false; if (view === "setup") render();
 }
@@ -605,10 +597,23 @@ async function readPhoto(file){
     const n = applyNines(r, "photo");
     addForm.msg = n ? n+"개 코스를 읽었어요. 숫자를 스코어카드와 비교해 보고 저장하세요." : "사진에서 홀별 파를 찾지 못했어요. 파 줄이 잘 보이게 다시 찍거나 직접 입력해 주세요.";
   } catch(e) {
-    addForm.msg = e && e.code === "not_granted" ? "Claude 사용을 허용하지 않아 사진을 읽을 수 없어요. 직접 입력해 주세요."
-      : e && e.code === "rate_limited" ? "잠시 후 다시 시도해 주세요." : e && e.code === "image_rejected" ? "이 사진은 읽을 수 없어요. 다른 사진을 골라 주세요." : "사진을 읽지 못했어요. 다시 시도하거나 직접 입력해 주세요.";
+    addForm.msg = aiErr(e, "사진을 읽지 못했어요. 다시 시도하거나 직접 입력해 주세요.");
   }
   addForm.busy = false; if (view === "addclub") render();
+}
+/* 사진 읽기 오류 안내 (js/ai.js 와 서버가 주는 code 기준) */
+function aiErr(e, other){
+  const c = e && e.code;
+  return c === "offline" ? "인터넷에 연결되어 있지 않아요. 연결된 뒤 다시 시도해 주세요."
+    : c === "network" ? "서버에 연결하지 못했어요. 신호가 좋은 곳에서 다시 시도해 주세요."
+    : c === "timeout" ? "응답이 너무 오래 걸려 멈췄어요. 신호가 좋은 곳에서 다시 시도해 주세요."
+    : c === "daily_limit" ? "오늘 사진 읽기 한도를 다 썼어요. 내일 다시 시도하거나 직접 입력해 주세요."
+    : c === "rate_limited" || c === "overloaded" ? "서버가 바빠요. 잠시 후 다시 시도해 주세요."
+    : c === "no_key" || c === "bad_key" ? "사진 읽기 서버의 API 키를 확인해 주세요."
+    : c === "no_credit" ? "API 크레딧이 떨어졌어요. Anthropic 콘솔에서 충전해 주세요."
+    : c === "image_rejected" || c === "too_large" ? "이 사진은 읽을 수 없어요. 다른 사진을 골라 주세요."
+    : c === "invalid_json" ? "답을 읽지 못했어요. 한 번 더 시도해 주세요."
+    : other;
 }
 
 function topBar(){
@@ -870,7 +875,7 @@ function resultText(){
 
 
 /* ---------- 설정 · 백업 (PWA 전용 추가) ---------- */
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.2.0";
 function prefs(){ return { myName, tieHigh, relMode, memGroup }; }
 function renderSettings(){
   let h = '<header class="top"><div class="brand">'+FLAG+'라운드 스코어 노트</div><button class="btn primary" data-a="new">+ 새 라운드</button></header>' + homeTabs();
@@ -904,7 +909,7 @@ function renderSettings(){
 }
 async function reloadAll(){
   const [r, c, m, s] = await Promise.all(["rounds","courses","members","settings"].map(n => AppStorage.readAll(n)));
-  onData(r); courses = c; members = m; settings = s; render();
+  onData(r); courses = c; setMembers(m); settings = s; render();
 }
 async function exportData(){
   const obj = await AppStorage.exportAll({ prefs: prefs() });
@@ -1011,7 +1016,6 @@ app.addEventListener("click", async e => {
     try { await saveNine(setup.clubId, v.found, v.par); v.done = true; toast(v.found+" 코스 저장했어요"); } catch(e) { toast("저장하지 못했어요"); } render(); }
   else if (a === "vadd") { const v = setup.verify[+b.dataset.i]; readSetupInputs();
     try { await saveNine(setup.clubId, v.name, v.par); v.found = v.name; v.same = true; v.done = true; toast(v.name+" 코스를 추가했어요"); } catch(e) { toast("저장하지 못했어요"); } render(); }
-  else if (a === "lookup") { if (!addForm.busy) lookupClub(); }
   else if (a === "apisearch") { if (!addForm.apiBusy) apiSearch(); }
   else if (a === "apipick") { if (!addForm.apiBusy) apiPick(b.dataset.id); }
   else if (a === "cpar") { readClubInputs(); addForm.fromLookup = false; const n = addForm.nines[+b.dataset.n]; const i = +b.dataset.i; n.par[i] = n.par[i] >= 5 ? 3 : n.par[i] + 1; render(); }
@@ -1148,7 +1152,6 @@ app.addEventListener("compositionend", e => {
   if (e.target.id === "f-q" && setup) { setup.q = e.target.value; const r = document.getElementById("results"); if (r) r.innerHTML = resultsHtml(); }
 });
 app.addEventListener("keydown", e => {
-  if (e.target.id === "c-look" && e.key === "Enter") { e.preventDefault(); if (addForm && !addForm.busy) lookupClub(); }
   if (e.target.id === "c-api" && e.key === "Enter") { e.preventDefault(); if (addForm && !addForm.apiBusy) apiSearch(); }
   if (e.target.id === "f-q" && e.key === "Enter") { e.preventDefault(); const first = app.querySelector("[data-a=club]"); if (first) first.click(); }
 });
@@ -1172,6 +1175,14 @@ function firstOpenHole(){
   for (let h = 0; h < 18; h++) if (!cur.players.every((_,i) => (cur.scores["p"+i]||[])[h] != null)) return h;
   return 0;
 }
+function setPhotoOK(ok){
+  if (ok === photoOK) return;
+  photoOK = ok;
+  const el = document.activeElement;
+  if (view === "play" || (el && el.matches("input,select,textarea"))) return;   // 입력 중에는 화면을 다시 그리지 않는다
+  if (view === "setup") readSetupInputs(); else if (view === "addclub") readClubInputs();
+  render();
+}
 
 /* ---------- boot ---------- */
 (async () => {
@@ -1180,12 +1191,12 @@ function firstOpenHole(){
   mstore = AppStorage.makeStore("members");
   sstore = AppStorage.makeStore("settings");
   dlFn = makeDownloader();
-  /* AI 사진 읽기(핸디표·공지·스코어카드)는 2단계에서 중간 서버를 통해 연결한다.
-     window.AI_PROVIDER 가 { json(prompt, {images}), limits() } 모양으로 주어지면 원본 기능이 그대로 살아난다. */
+  /* AI 사진 읽기(핸디표·공지·스코어카드)는 js/ai.js 가 중계 서버를 통해 연결한다.
+     골프장은 신호가 약하므로 서버 확인을 기다리지 않는다: 마지막으로 확인한 값으로 바로 띄우고 뒤에서 맞춘다. */
   sampleFn = window.AI_PROVIDER || null; assetsFn = null;
-  if (sampleFn) { try { const l = await sampleFn.limits(); photoOK = !!(l && l.images); } catch(e){ photoOK = false; } }
+  if (sampleFn) { photoOK = sampleFn.known(); sampleFn.limits().then(l => setPhotoOK(!!l.images)); }
   AppStorage.persist();
-  mstore.watch(o => { members = o; if (view === "list" || view === "setup") render(); });
+  mstore.watch(o => { setMembers(o); if (view === "list" || view === "setup") render(); });
   sstore.watch(o => { settings = o; if (view === "list" && home === "hcp") render(); });
   cstore.watch(o => { courses = o; if (view === "setup" || view === "list") render(); });
   store.watch(onData);
